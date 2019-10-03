@@ -1,0 +1,23 @@
+sudo: required
+services:
+  - docker
+
+
+before_install:
+  - docker build -t 96vksingh/fibo-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true 96vksingh/fibo-test npm run test
+
+after_success:
+  - docker build -t 96vksingh/fibo-container-ex ./client
+  - docker build -t 96vksingh/fibo-nginx ./nginx
+  - docker build -t 96vksingh/fibo-worker ./worker
+  - docker build -t 96vksingh/fibo-server ./server
+  #login in docker login
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  #pushing images to docker hub
+  - docker push 96vksingh/fibo-container-ex
+  - docker push 96vksingh/fibo-nginx
+  - docker push 96vksingh/fibo-worker
+  - docker push 96vksingh/fibo-server
